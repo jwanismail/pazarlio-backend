@@ -1,0 +1,86 @@
+{
+  "nav": {
+    "home": "الرئيسية",
+    "explore": "استكشاف",
+    "addListing": "إضافة إعلان",
+    "myListings": "إعلاناتي",
+    "profile": "الملف الشخصي",
+    "login": "تسجيل الدخول",
+    "register": "تسجيل",
+    "logout": "تسجيل الخروج"
+  },
+  "home": {
+    "welcome": "مرحباً بك في موقع إعلانات سكن كيركلارلي الحكومي",
+    "description": "قم بإجراء عمليات البيع والشراء بأمان داخل السكن",
+    "search": "البحث في الإعلانات",
+    "categories": "التصنيفات",
+    "latestListings": "أحدث الإعلانات",
+    "viewAll": "عرض الكل"
+  },
+  "listing": {
+    "add": "إضافة إعلان",
+    "edit": "تعديل الإعلان",
+    "delete": "حذف الإعلان",
+    "title": "العنوان",
+    "description": "الوصف",
+    "price": "السعر",
+    "location": "الموقع",
+    "category": "التصنيف",
+    "contact": "اتصل بنا",
+    "images": "الصور",
+    "upload": "رفع صورة",
+    "submit": "نشر الإعلان",
+    "update": "تحديث",
+    "sold": "تم البيع",
+    "markAsSold": "وضع علامة كمباع",
+    "block": "البلوك",
+    "room": "الغرفة",
+    "dormitory": "السكن"
+  },
+  "categories": {
+    "electronics": "إلكترونيات",
+    "furniture": "أثاث",
+    "clothing": "ملابس",
+    "books": "كتب",
+    "sports": "رياضة",
+    "other": "أخرى"
+  },
+  "auth": {
+    "login": "تسجيل الدخول",
+    "register": "تسجيل",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "confirmPassword": "تأكيد كلمة المرور",
+    "name": "الاسم الكامل",
+    "forgotPassword": "نسيت كلمة المرور",
+    "noAccount": "ليس لديك حساب؟",
+    "hasAccount": "لديك حساب بالفعل؟"
+  },
+  "profile": {
+    "edit": "تعديل الملف الشخصي",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "name": "الاسم الكامل",
+    "email": "البريد الإلكتروني",
+    "phone": "الهاتف",
+    "address": "العنوان"
+  },
+  "common": {
+    "loading": "جاري التحميل...",
+    "error": "حدث خطأ",
+    "success": "تمت العملية بنجاح",
+    "confirm": "تأكيد",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "search": "بحث",
+    "filter": "تصفية",
+    "sort": "ترتيب",
+    "view": "عرض",
+    "back": "رجوع",
+    "next": "التالي",
+    "previous": "السابق",
+    "language": "اللغة"
+  }
+} 

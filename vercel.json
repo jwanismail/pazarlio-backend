@@ -1,0 +1,30 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "server/server.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "client/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/server/server.js"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/client/dist/$1"
+    }
+  ],
+  "env": {
+    "MONGODB_URI": "mongodb+srv://civanelismail571:Hirciv19@pazarlio2.kegaoz4.mongodb.net/ilan-db?retryWrites=true&w=majority&appName=pazarLio2",
+    "JWT_SECRET": "pazarlio-super-gizli-jwt-secret-key-2024"
+  }
+}

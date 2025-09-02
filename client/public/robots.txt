@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://pazarlio.com/sitemap.xml
+
+# Disallow private pages
+Disallow: /login
+Disallow: /register
+Disallow: /sifremi-unuttum
+Disallow: /telefon-dogrulama
+Disallow: /ilanlarim
+Disallow: /ilan-duzenle/
+Disallow: /kullanici-belirle
+
+# Crawl delay
+Crawl-delay: 1 
