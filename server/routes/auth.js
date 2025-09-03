@@ -179,7 +179,7 @@ router.post('/kayit', async (req, res) => {
       ad, 
       soyad, 
       email, 
-      telefon, 
+      telefon: telefon || 'belirtilmedi',
       il,
       yurt,
       sifre: sifre ? '***' : 'boş' 
@@ -192,12 +192,14 @@ router.post('/kayit', async (req, res) => {
       return res.status(400).json({ message: 'Bu email adresi zaten kullanılıyor' })
     }
 
-    // Telefon kontrolü
-    const temizTelefon = telefon.replace(/\D/g, '')
-    const existingUserByPhone = await User.findOne({ telefon: temizTelefon })
-    if (existingUserByPhone) {
-      console.log('Telefon zaten kullanılıyor:', temizTelefon)
-      return res.status(400).json({ message: 'Bu telefon numarası zaten kullanılıyor' })
+    // Telefon kontrolü - sadece telefon verilmişse kontrol et
+    if (telefon && telefon.trim()) {
+      const temizTelefon = telefon.replace(/\D/g, '')
+      const existingUserByPhone = await User.findOne({ telefon: temizTelefon })
+      if (existingUserByPhone) {
+        console.log('Telefon zaten kullanılıyor:', temizTelefon)
+        return res.status(400).json({ message: 'Bu telefon numarası zaten kullanılıyor' })
+      }
     }
 
     // Yeni kullanıcı oluştur (şifre model middleware'inde hashlenir)
@@ -205,7 +207,7 @@ router.post('/kayit', async (req, res) => {
       ad,
       soyad,
       email: email.toLowerCase(),
-      telefon: temizTelefon,
+      telefon: telefon ? telefon.replace(/\D/g, '') : '', // Telefon varsa temizle, yoksa boş string
       il,
       yurt,
       sifre: sifre // Model middleware'i otomatik hashleyecek
@@ -216,7 +218,7 @@ router.post('/kayit', async (req, res) => {
     console.log('Kullanıcı kaydedildi:', { 
       id: user._id, 
       email: user.email, 
-      telefon: user.telefon 
+      telefon: user.telefon || 'belirtilmedi'
     })
 
     // JWT token oluştur
@@ -249,42 +251,71 @@ router.post('/dogrulama-kodu-gonder', async (req, res) => {
   try {
     const { telefon } = req.body
 
+    console.log('Doğrulama kodu gönderme isteği:', { telefon })
+
     // Telefon numarasını temizle
     const temizTelefon = telefon.replace(/\D/g, '')
+    console.log('Temizlenmiş telefon:', temizTelefon)
     
     // Kullanıcıyı bul
     const user = await User.findOne({ telefon: temizTelefon })
     if (!user) {
+      console.log('Kullanıcı bulunamadı:', temizTelefon)
       return res.status(404).json({ message: 'Bu telefon numarası ile kayıtlı kullanıcı bulunamadı' })
     }
 
+    console.log('Kullanıcı bulundu:', { 
+      id: user._id, 
+      ad: user.ad, 
+      email: user.email, 
+      telefon: user.telefon 
+    })
+
     // 6 haneli doğrulama kodu oluştur
     const dogrulamaKodu = Math.floor(100000 + Math.random() * 900000).toString()
+    console.log('Oluşturulan doğrulama kodu:', dogrulamaKodu)
     
     // Kodu veritabanına kaydet (10 dakika geçerli)
     user.dogrulamaKodu = dogrulamaKodu
     user.dogrulamaKoduGecerlilik = new Date(Date.now() + 10 * 60 * 1000) // 10 dakika
     await user.save()
 
+    console.log('Doğrulama kodu veritabanına kaydedildi')
+
     // SMS gönder (test modunda console'a yazdır)
     if (process.env.NODE_ENV === 'production' && twilioClient) {
       try {
         await twilioClient.messages.create({
-          body: `Doğrulama kodunuz: ${dogrulamaKodu}`,
+          body: `PazarLio doğrulama kodunuz: ${dogrulamaKodu}`,
           from: process.env.TWILIO_PHONE_NUMBER,
           to: `+90${temizTelefon}`
         })
+        console.log('SMS başarıyla gönderildi:', temizTelefon)
       } catch (smsError) {
         console.error('SMS gönderme hatası:', smsError)
+        // SMS hatası olsa bile kodu console'da göster
+        console.log(`⚠️ SMS gönderilemedi ama kod hazır: ${dogrulamaKodu}`)
       }
     } else {
       // Test modunda console'a yazdır
-      console.log(`Test modu - Doğrulama kodu: ${dogrulamaKodu} (${temizTelefon} numarasına gönderildi)`)
+      console.log('')
+      console.log('🔐 ==========================================')
+      console.log('📱 TELEFON DOĞRULAMA KODU')
+      console.log('==========================================')
+      console.log(`📞 Telefon: ${temizTelefon}`)
+      console.log(`🔢 Kod: ${dogrulamaKodu}`)
+      console.log(`⏰ Geçerlilik: 10 dakika`)
+      console.log(`👤 Kullanıcı: ${user.ad} ${user.soyad}`)
+      console.log('==========================================')
+      console.log('')
     }
 
     res.json({ 
       message: 'Doğrulama kodu gönderildi',
-      telefon: temizTelefon.replace(/(\d{3})(\d{3})(\d{4})/, '$1 *** $3') // Telefon numarasını gizle
+      telefon: temizTelefon.replace(/(\d{3})(\d{3})(\d{4})/, '$1 *** $3'), // Telefon numarasını gizle
+      testMode: process.env.NODE_ENV !== 'production',
+      kodGoster: process.env.NODE_ENV !== 'production', // Test modunda frontend'e bilgi ver
+      testCode: process.env.NODE_ENV !== 'production' ? dogrulamaKodu : null // Test modunda kodu gönder
     })
   } catch (error) {
     console.error('Doğrulama kodu gönderme hatası:', error)
@@ -353,28 +384,25 @@ router.post('/giris', async (req, res) => {
 
     console.log('Giriş isteği:', { emailOrPhone, sifre: sifre ? '***' : 'boş' })
 
-    // Email veya telefon ile kullanıcıyı bul
-    let user
-    if (emailOrPhone.includes('@')) {
-      // Email formatında ise email ile ara
-      user = await User.findOne({ email: emailOrPhone.toLowerCase() })
-      console.log('Email ile arama yapıldı:', emailOrPhone.toLowerCase())
-    } else {
-      // Telefon formatında ise telefon ile ara
-      const temizTelefon = emailOrPhone.replace(/\D/g, '')
-      user = await User.findOne({ telefon: temizTelefon })
-      console.log('Telefon ile arama yapıldı:', temizTelefon)
+    // Sadece email ile giriş yapılabilir
+    if (!emailOrPhone.includes('@')) {
+      console.log('Telefon numarası ile giriş denendi, reddedildi:', emailOrPhone)
+      return res.status(400).json({ message: 'Sadece email adresi ile giriş yapabilirsiniz' })
     }
+
+    // Email ile kullanıcıyı bul
+    const user = await User.findOne({ email: emailOrPhone.toLowerCase() })
+    console.log('Email ile arama yapıldı:', emailOrPhone.toLowerCase())
 
     if (!user) {
       console.log('Kullanıcı bulunamadı')
-      return res.status(400).json({ message: 'Geçersiz email/telefon veya şifre' })
+      return res.status(400).json({ message: 'Geçersiz email veya şifre' })
     }
 
     console.log('Kullanıcı bulundu:', { 
       id: user._id, 
       email: user.email, 
-      telefon: user.telefon,
+      telefon: user.telefon || 'belirtilmedi',
       sifreHashli: user.sifre ? 'var' : 'yok'
     })
 
@@ -383,7 +411,7 @@ router.post('/giris', async (req, res) => {
     console.log('Şifre kontrolü:', isMatch)
     
     if (!isMatch) {
-      return res.status(400).json({ message: 'Geçersiz email/telefon veya şifre' })
+      return res.status(400).json({ message: 'Geçersiz email veya şifre' })
     }
 
     // JWT token oluştur

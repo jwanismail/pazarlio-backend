@@ -5,10 +5,17 @@ const User = require('../models/User')
 
 // Admin middleware - basit token kontrolü
 const adminAuth = (req, res, next) => {
+  console.log('Admin auth middleware çalıştı')
+  console.log('Headers:', req.headers)
+  
   const token = req.headers.authorization?.split(' ')[1]
+  console.log('Token:', token)
+  
   if (token === 'admin-auth-token') {
+    console.log('Admin auth başarılı')
     next()
   } else {
+    console.log('Admin auth başarısız - token:', token)
     res.status(401).json({ success: false, message: 'Yetkisiz erişim' })
   }
 }
@@ -16,9 +23,13 @@ const adminAuth = (req, res, next) => {
 // Tüm ilanları getir
 router.get('/ilanlar', adminAuth, async (req, res) => {
   try {
-    const ilanlar = await Ilan.find().populate('kullanici', 'ad soyad email')
+    console.log('Admin: İlanlar getiriliyor...')
+    const ilanlar = await Ilan.find().populate('sahibi', 'ad soyad email')
+    console.log('Admin: Bulunan ilan sayısı:', ilanlar.length)
+    console.log('Admin: İlanlar:', ilanlar)
     res.json({ success: true, ilanlar })
   } catch (error) {
+    console.error('Admin: İlanlar yüklenirken hata:', error)
     res.status(500).json({ success: false, message: 'İlanlar yüklenirken hata oluştu' })
   }
 })
@@ -26,9 +37,13 @@ router.get('/ilanlar', adminAuth, async (req, res) => {
 // Tüm kullanıcıları getir
 router.get('/kullanicilar', adminAuth, async (req, res) => {
   try {
+    console.log('Admin: Kullanıcılar getiriliyor...')
     const kullanicilar = await User.find().select('-sifre')
+    console.log('Admin: Bulunan kullanıcı sayısı:', kullanicilar.length)
+    console.log('Admin: Kullanıcılar:', kullanicilar)
     res.json({ success: true, kullanicilar })
   } catch (error) {
+    console.error('Admin: Kullanıcılar yüklenirken hata:', error)
     res.status(500).json({ success: false, message: 'Kullanıcılar yüklenirken hata oluştu' })
   }
 })

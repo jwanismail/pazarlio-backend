@@ -10,19 +10,9 @@ const adminRoutes = require('./routes/admin'); // Admin route'larını import et
 
 const app = express();
 
-// CORS ayarları - Daha detaylı
+// CORS ayarları - Tüm origin'leri kabul et
 app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'http://localhost:5173', 
-    'http://localhost:5174', 
-    'http://localhost:3000',
-    'https://pazarlio.onrender.com', 
-    'https://pazarlio.com', 
-    'https://www.pazarlio.com',
-    'https://pazar-lio.com',
-    'https://www.pazar-lio.com'
-  ],
+  origin: true, // Tüm origin'leri kabul et
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']

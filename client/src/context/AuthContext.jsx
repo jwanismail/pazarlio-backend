@@ -39,10 +39,10 @@ export const AuthProvider = ({ children }) => {
     }
   }, [])
 
-  const login = async (emailOrPhone, sifre) => {
+  const login = async (email, sifre) => {
     try {
       const response = await axios.post(`${API_URL}/giris`, {
-        emailOrPhone,
+        emailOrPhone: email, // Backend'de hala emailOrPhone olarak gönderiyoruz ama sadece email kabul ediyoruz
         sifre
       })
       const userData = response.data
@@ -68,7 +68,7 @@ export const AuthProvider = ({ children }) => {
         ad,
         soyad,
         email,
-        telefon,
+        telefon: telefon || '', // Telefon numarası artık opsiyonel
         il,
         yurt,
         sifre

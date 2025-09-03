@@ -28,6 +28,7 @@ import {
   FaTrophy,
   FaGem
 } from 'react-icons/fa'
+import API_URL from '../config/api'
 
 const AdminPanel = () => {
   const navigate = useNavigate()
@@ -61,14 +62,27 @@ const AdminPanel = () => {
   const fetchData = async () => {
     setLoading(true)
     try {
+      const adminToken = localStorage.getItem('adminToken')
+      console.log('Admin token:', adminToken)
+      
       // İlanları getir
-      const ilanlarResponse = await fetch('http://localhost:5001/admin/ilanlar')
+      const ilanlarResponse = await fetch(`${API_URL}/admin/ilanlar`, {
+        headers: {
+          'Authorization': `Bearer ${adminToken}`
+        }
+      })
       const ilanlarData = await ilanlarResponse.json()
+      console.log('İlanlar response:', ilanlarData)
       setIlanlar(ilanlarData.ilanlar || [])
 
       // Kullanıcıları getir
-      const kullanicilarResponse = await fetch('http://localhost:5001/admin/kullanicilar')
+      const kullanicilarResponse = await fetch(`${API_URL}/admin/kullanicilar`, {
+        headers: {
+          'Authorization': `Bearer ${adminToken}`
+        }
+      })
       const kullanicilarData = await kullanicilarResponse.json()
+      console.log('Kullanıcılar response:', kullanicilarData)
       setKullanicilar(kullanicilarData.kullanicilar || [])
 
       // İstatistikleri hesapla
@@ -98,7 +112,7 @@ const AdminPanel = () => {
     setLoading(true)
     try {
       const endpoint = type === 'ilan' ? 'admin/ilan-sil' : 'admin/kullanici-sil'
-      const response = await fetch(`http://localhost:5001/${endpoint}`, {
+      const response = await fetch(`${API_URL}/${endpoint}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -126,7 +140,7 @@ const AdminPanel = () => {
     setLoading(true)
     try {
       const endpoint = deleteType === 'ilan' ? 'admin/ilanlar-sil' : 'admin/kullanicilar-sil'
-      const response = await fetch(`http://localhost:5001/${endpoint}`, {
+      const response = await fetch(`${API_URL}/${endpoint}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -151,7 +165,7 @@ const AdminPanel = () => {
   const handlePromoteIlan = async (id) => {
     setLoading(true)
     try {
-      const response = await fetch('http://localhost:5001/admin/ilan-one-cikar', {
+      const response = await fetch(`${API_URL}/admin/ilan-one-cikar`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -174,7 +188,7 @@ const AdminPanel = () => {
   const handleBanUser = async (id) => {
     setLoading(true)
     try {
-      const response = await fetch('http://localhost:5001/admin/kullanici-engelle', {
+      const response = await fetch(`${API_URL}/admin/kullanici-engelle`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

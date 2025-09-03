@@ -13,7 +13,6 @@ import IlanDuzenle from './pages/IlanDuzenle'
 import KullaniciBelirle from './pages/KullaniciBelirle'
 import Login from './pages/Login'
 import Register from './pages/Register'
-import TelefonDogrulama from './pages/TelefonDogrulama'
 import SifremiUnuttum from './pages/SifremiUnuttum'
 import Profil from './pages/Profil'
 import AdminLogin from './pages/AdminLogin'
@@ -55,9 +54,9 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 full-width">
           <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
-          <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+          <main className="w-full">
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/test" element={<Test />} />
@@ -69,7 +68,6 @@ function App() {
               <Route path="/kullanici-belirle" element={<KullaniciBelirle />} />
               <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
-              <Route path="/telefon-dogrulama" element={<TelefonDogrulama />} />
               <Route path="/sifremi-unuttum" element={<SifremiUnuttum />} />
               <Route path="/profil" element={<Profil />} />
               <Route path="/admin-login" element={<AdminLogin />} />

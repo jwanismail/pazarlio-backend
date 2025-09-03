@@ -376,7 +376,7 @@ const IlanEkle = () => {
             
             <div>
               <label htmlFor="konum" className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-2">
-                Detaylı Konum
+                Kaldığınız Yurt ve ya Detaylı Konum
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
