@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
-import { FaUser, FaEnvelope, FaLock, FaUserPlus, FaMapMarkerAlt, FaBuilding } from 'react-icons/fa'
+import { FaUser, FaEnvelope, FaLock, FaPhone, FaUserPlus, FaMapMarkerAlt, FaBuilding } from 'react-icons/fa'
 import { motion } from 'framer-motion'
 import { turkiyeIlleri, yurtTipleri } from '../data/turkiyeIlleri'
 
@@ -12,6 +12,7 @@ const Register = () => {
     ad: '',
     soyad: '',
     email: '',
+    telefon: '',
     il: '',
     yurt: '',
     sifre: '',
@@ -20,12 +21,39 @@ const Register = () => {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
+  // Telefon numarası formatlaması
+  const formatPhoneNumber = (value) => {
+    // Sadece rakamları al
+    const phoneNumber = value.replace(/\D/g, '')
+    
+    // Türkiye telefon numarası formatı (5XX XXX XX XX)
+    if (phoneNumber.length <= 3) {
+      return phoneNumber
+    } else if (phoneNumber.length <= 6) {
+      return `${phoneNumber.slice(0, 3)} ${phoneNumber.slice(3)}`
+    } else if (phoneNumber.length <= 8) {
+      return `${phoneNumber.slice(0, 3)} ${phoneNumber.slice(3, 6)} ${phoneNumber.slice(6)}`
+    } else {
+      return `${phoneNumber.slice(0, 3)} ${phoneNumber.slice(3, 6)} ${phoneNumber.slice(6, 8)} ${phoneNumber.slice(8, 10)}`
+    }
+  }
+
   const handleChange = (e) => {
     const { name, value } = e.target
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }))
+    
+    if (name === 'telefon') {
+      // Telefon numarası formatlaması
+      const formattedValue = formatPhoneNumber(value)
+      setFormData(prev => ({
+        ...prev,
+        [name]: formattedValue
+      }))
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }))
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -44,7 +72,7 @@ const Register = () => {
         formData.ad,
         formData.soyad,
         formData.email,
-        '', // Telefon numarası artık gerekli değil
+        formData.telefon.replace(/\s/g, ''), // Telefon numarasından boşlukları temizle
         formData.il,
         formData.yurt,
         formData.sifre
@@ -140,6 +168,25 @@ const Register = () => {
                   onChange={handleChange}
                   className="appearance-none rounded-none relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                   placeholder="E-posta adresi"
+                />
+              </div>
+            </div>
+            <div>
+              <label htmlFor="telefon" className="sr-only">Telefon</label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <FaPhone className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  id="telefon"
+                  name="telefon"
+                  type="tel"
+                  required
+                  maxLength="13"
+                  value={formData.telefon}
+                  onChange={handleChange}
+                  className="appearance-none rounded-none relative block w-full px-3 py-2 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                  placeholder="5XX XXX XX XX"
                 />
               </div>
             </div>

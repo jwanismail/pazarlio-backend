@@ -21,8 +21,8 @@ const userSchema = new mongoose.Schema({
   },
   telefon: {
     type: String,
-    required: false, // Artık zorunlu değil
-    unique: false, // Unique olmamalı çünkü boş olabilir
+    required: [true, 'Telefon alanı zorunludur'],
+    unique: true,
     trim: true
   },
   il: {

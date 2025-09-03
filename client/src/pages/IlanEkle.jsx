@@ -68,19 +68,48 @@ const IlanEkle = () => {
   // Dosya seçildiğinde base64'e çevir
   const handleImageChange = async (e) => {
     const files = Array.from(e.target.files)
-    const promises = files.map(file => {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader()
-        reader.onload = () => resolve(reader.result)
-        reader.onerror = reject
-        reader.readAsDataURL(file)
+    
+    // Maksimum 5 resim kontrolü
+    if (formData.resimler.length + files.length > 5) {
+      setError('Maksimum 5 resim yükleyebilirsiniz!')
+      return
+    }
+    
+    // Dosya boyutu kontrolü (5MB)
+    const maxSize = 5 * 1024 * 1024 // 5MB
+    const oversizedFiles = files.filter(file => file.size > maxSize)
+    if (oversizedFiles.length > 0) {
+      setError('Bazı dosyalar çok büyük! Maksimum dosya boyutu 5MB olmalıdır.')
+      return
+    }
+    
+    // Dosya tipi kontrolü
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
+    const invalidFiles = files.filter(file => !allowedTypes.includes(file.type))
+    if (invalidFiles.length > 0) {
+      setError('Sadece JPEG, PNG ve WebP formatında resim yükleyebilirsiniz!')
+      return
+    }
+    
+    try {
+      const promises = files.map(file => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader()
+          reader.onload = () => resolve(reader.result)
+          reader.onerror = reject
+          reader.readAsDataURL(file)
+        })
       })
-    })
-    const base64Images = await Promise.all(promises)
-    setFormData(prev => ({
-      ...prev,
-      resimler: [...prev.resimler, ...base64Images]
-    }))
+      
+      const base64Images = await Promise.all(promises)
+      setFormData(prev => ({
+        ...prev,
+        resimler: [...prev.resimler, ...base64Images]
+      }))
+      setError('') // Hata mesajını temizle
+    } catch (error) {
+      setError('Resim yüklenirken hata oluştu!')
+    }
   }
 
   const handleRemoveImage = (index) => {
@@ -88,6 +117,20 @@ const IlanEkle = () => {
       ...prev,
       resimler: prev.resimler.filter((_, i) => i !== index)
     }))
+  }
+
+  // Drag & Drop için
+  const handleDragOver = (e) => {
+    e.preventDefault()
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault()
+    const files = Array.from(e.dataTransfer.files)
+    if (files.length > 0) {
+      const event = { target: { files } }
+      handleImageChange(event)
+    }
   }
 
   const handleChange = (e) => {
@@ -436,46 +479,63 @@ const IlanEkle = () => {
               <label className="block text-lg font-medium text-gray-700 dark:text-gray-300 mb-4">
                 Ürün fotoğrafları
               </label>
-              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center">
+                             <div 
+                    className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center relative"
+                    style={{ minHeight: '200px' }}
+                    onDragOver={handleDragOver}
+                    onDrop={handleDrop}>
                 <input
                   type="file"
                   accept="image/*"
                   multiple
                   onChange={handleImageChange}
                   className="hidden"
-                  id="image-upload"
+                  id="resimler"
                 />
                 <label
-                  htmlFor="image-upload"
+                  htmlFor="resimler"
                   className="cursor-pointer flex flex-col items-center"
                 >
                   <FaImage className="h-12 w-12 text-gray-400 mb-4" />
                   <span className="text-lg font-medium text-gray-700 dark:text-gray-300">
-                    Fotoğraf yüklemek için tıklayın
+                    Fotoğraf yüklemek için tıklayın veya sürükleyin
                   </span>
                   <span className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    PNG, JPG, GIF dosyaları kabul edilir
+                    PNG, JPG, GIF veya WebP formatında resimler kabul edilir
                   </span>
+                  <div className="mt-2 text-xs text-gray-400">
+                    Maksimum 5 resim, her biri 5MB'dan küçük
+                  </div>
                 </label>
+                {error && (
+                  <p className="mt-2 text-sm text-red-500 dark:text-red-400">{error}</p>
+                )}
               </div>
               
               {formData.resimler.length > 0 && (
                 <div className="mt-6">
                   <h4 className="text-lg font-medium text-gray-700 dark:text-gray-300 mb-3">
-                    Yüklenen Fotoğraflar ({formData.resimler.length})
+                    Yüklenen Fotoğraflar ({formData.resimler.length}/5)
                   </h4>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {formData.resimler.map((img, idx) => (
                       <div key={idx} className="relative group">
-                        <img src={img} alt={`Yüklenen resim ${idx + 1}`} className="h-32 w-full object-cover rounded-lg" />
+                        <img 
+                          src={img} 
+                          alt={`Yüklenen resim ${idx + 1}`} 
+                          className="h-32 w-full object-cover rounded-lg border border-gray-200 dark:border-gray-600" 
+                        />
                         <button
                           type="button"
                           onClick={() => handleRemoveImage(idx)}
-                          className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-2 hover:bg-red-600 opacity-80 group-hover:opacity-100"
+                          className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-8 h-8 flex items-center justify-center hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
                           title="Resmi Kaldır"
                         >
                           <FaTrash className="w-4 h-4" />
                         </button>
+                        <div className="absolute bottom-2 left-2 bg-black bg-opacity-50 text-white text-xs px-2 py-1 rounded">
+                          {idx + 1}
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -500,11 +560,18 @@ const IlanEkle = () => {
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
                 <div className="relative">
                   {formData.resimler && formData.resimler.length > 0 ? (
-                    <img
-                      src={formData.resimler[0]}
-                      alt={formData.baslik}
-                      className="w-full h-48 object-cover"
-                    />
+                    <div className="relative">
+                      <img
+                        src={formData.resimler[0]}
+                        alt={formData.baslik}
+                        className="w-full h-48 object-cover"
+                      />
+                      {formData.resimler.length > 1 && (
+                        <div className="absolute top-2 right-2 bg-black bg-opacity-50 text-white text-sm px-2 py-1 rounded">
+                          +{formData.resimler.length - 1} daha
+                        </div>
+                      )}
+                    </div>
                   ) : (
                     <div className="w-full h-48 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
                       <span className="text-gray-400 dark:text-gray-500">Fotoğraf Yok</span>

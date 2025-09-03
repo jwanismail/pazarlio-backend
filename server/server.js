@@ -32,7 +32,13 @@ app.use('/api/ilanlar', ilanlarRoutes);
 app.use('/admin', adminRoutes);
 
 // MongoDB bağlantısı
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://civanelismail571:Hirciv19@pazarlio2.kegaoz4.mongodb.net/ilan-db?retryWrites=true&w=majority&appName=pazarLio2';
+
+const MONGODB_URI = process.env.MONGODB_URI
+
+if (!MONGODB_URI) {
+  console.error('MONGODB_URI environment variable bulunamadı!')
+  process.exit(1)
+}
 
 mongoose.connect(MONGODB_URI, {
   useNewUrlParser: true,

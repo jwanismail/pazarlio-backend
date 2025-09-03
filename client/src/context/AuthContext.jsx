@@ -68,7 +68,7 @@ export const AuthProvider = ({ children }) => {
         ad,
         soyad,
         email,
-        telefon: telefon || '', // Telefon numarası artık opsiyonel
+        telefon,
         il,
         yurt,
         sifre

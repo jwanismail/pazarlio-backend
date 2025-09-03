@@ -179,7 +179,7 @@ router.post('/kayit', async (req, res) => {
       ad, 
       soyad, 
       email, 
-      telefon: telefon || 'belirtilmedi',
+      telefon,
       il,
       yurt,
       sifre: sifre ? '***' : 'boş' 
@@ -192,14 +192,12 @@ router.post('/kayit', async (req, res) => {
       return res.status(400).json({ message: 'Bu email adresi zaten kullanılıyor' })
     }
 
-    // Telefon kontrolü - sadece telefon verilmişse kontrol et
-    if (telefon && telefon.trim()) {
-      const temizTelefon = telefon.replace(/\D/g, '')
-      const existingUserByPhone = await User.findOne({ telefon: temizTelefon })
-      if (existingUserByPhone) {
-        console.log('Telefon zaten kullanılıyor:', temizTelefon)
-        return res.status(400).json({ message: 'Bu telefon numarası zaten kullanılıyor' })
-      }
+    // Telefon kontrolü
+    const temizTelefon = telefon.replace(/\D/g, '')
+    const existingUserByPhone = await User.findOne({ telefon: temizTelefon })
+    if (existingUserByPhone) {
+      console.log('Telefon zaten kullanılıyor:', temizTelefon)
+      return res.status(400).json({ message: 'Bu telefon numarası zaten kullanılıyor' })
     }
 
     // Yeni kullanıcı oluştur (şifre model middleware'inde hashlenir)
@@ -207,7 +205,7 @@ router.post('/kayit', async (req, res) => {
       ad,
       soyad,
       email: email.toLowerCase(),
-      telefon: telefon ? telefon.replace(/\D/g, '') : '', // Telefon varsa temizle, yoksa boş string
+      telefon: temizTelefon,
       il,
       yurt,
       sifre: sifre // Model middleware'i otomatik hashleyecek
@@ -218,7 +216,7 @@ router.post('/kayit', async (req, res) => {
     console.log('Kullanıcı kaydedildi:', { 
       id: user._id, 
       email: user.email, 
-      telefon: user.telefon || 'belirtilmedi'
+      telefon: user.telefon
     })
 
     // JWT token oluştur
